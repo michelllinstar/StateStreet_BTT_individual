@@ -10,7 +10,7 @@ Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fa
 
 | Name | GitHub Handle | Contribution |
 |------|---------------|--------------|
-| Michelle Lin | @[your-handle] | Individual project: all milestones (data preparation, EDA, modeling, recommendation prototype) |
+| Michelle Lin | [@michelllinstar](https://github.com/michelllinstar) | Individual project: all milestones (data preparation, EDA, modeling, recommendation prototype) |
 
 > This project started as a team project and became an individual project.
 
@@ -18,10 +18,10 @@ Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fa
 
 ## 🎯 Project Highlights
 
-- Built a reproducible pipeline that turns **45,957 raw campaigns** into **38,463 U.S. campaigns** with a final success/fail outcome.
-- Cleaned inconsistent category labels (e.g. `Film &amp; Video` vs. `Film & Video`) and removed **data-leakage** columns (pledged, backers, comments, funded date).
-- Engineered features from reward tiers (min and max reward) and encoded categorical variables, giving a **70-column model-ready dataset**.
-- EDA found that **goal size, campaign length, category, and reward tiers** all relate strongly to success. **Updates** show the strongest link but are flagged as possible leakage.
+- Built a reproducible pipeline that turns **45,957 raw campaigns** into **38,492 U.S. campaigns** with a final success/fail outcome.
+- Cleaned inconsistent category labels (e.g. `Film &amp; Video` vs. `Film & Video`) and quarantined **data-leakage** columns (pledged, funded percentage, backers, comments, updates).
+- Recovered the **launch date** (deadline − duration) and engineered reward-tier statistics, pacing ratios, and launch-timing features, giving a **32-column model-ready matrix**.
+- EDA found **goal size** is the dominant launch-time predictor (ρ = −0.26), followed by reward-tier *count* and duration. Category spans a 44-point success range; state spans only 28.
 
 ---
 
@@ -29,21 +29,28 @@ Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fa
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/<your-username>/kickstarter-success-predictor.git
-cd kickstarter-success-predictor
+git clone https://github.com/michelllinstar/StateStreet_BTT_individual.git
+cd StateStreet_BTT_individual
 ```
 
-**2. Create a virtual environment** (Python 3.11+)
+**2. Create a virtual environment**
+
+⚠️ **Python 3.11 or newer is required.** On older interpreters (3.8/3.9, which ship with macOS and
+are often first on `PATH`) `pip` finds no prebuilt wheels for current pandas and falls back to
+compiling from source, which hangs for a long time and then fails. Check before creating the
+environment:
+
 ```bash
-# macOS / Linux
-python3 -m venv .venv && source .venv/bin/activate
+python3 --version        # must be 3.11+; if not, point explicitly at a newer one
+python3.13 -m venv .venv && source .venv/bin/activate
 # Windows PowerShell
-python -m venv .venv; .venv\Scripts\Activate.ps1
+py -3.13 -m venv .venv; .venv\Scripts\Activate.ps1
 ```
 
 **3. Install dependencies**
 ```bash
 pip install -r requirements.txt
+python -m ipykernel install --user --name kickstarter   # register the kernel for Jupyter
 ```
 
 **4. Get the data**
@@ -51,22 +58,42 @@ Download the Kickstarter Projects dataset from Kaggle and save it as:
 ```
 data/DSI_kickstarterscrape_dataset.csv
 ```
-*(Optional:* `sample_data/kickstarter_sample.csv` *has 500 rows to try things quickly.)*
+The file is 12.9 MB and git-ignored, so it is not in the repository.
 
-**5. Build the clean dataset**
-```bash
-python scripts/load_and_inspect_data.py   # optional: inspect the raw file
-python scripts/filter_campaigns.py        # writes data/processed/kickstarter_us_clean.csv
+**5. Run the notebook** (Jupyter or VS Code — select the `kickstarter` kernel)
+
+| Notebook | Tasks | What it does |
+|----------|-------|--------------|
+| `notebooks/kickstarter_data_prep_and_eda.ipynb` | 1–5 | Ingestion & US filtering, cleaning & missing values, feature engineering, encoding & scaling, EDA. Self-contained — runs top to bottom with no other project files. |
+| `notebooks/milestone3_modeling.ipynb` | Modeling | *Coming next* |
+| `notebooks/milestone4_recommendations.ipynb` | Recommendation prototype | *Planned* |
+
+Running it end to end writes:
+
+| Output | Contents |
+|---|---|
+| `data/processed/kickstarter_us_clean.csv` | 38,492 × 29 — cleaned, unscaled, real units. Use for EDA and for reading rows by eye. |
+| `data/processed/train_encoded.csv` | 30,793 × 33 — encoded and scaled, plus the `success` label. |
+| `data/processed/test_encoded.csv` | 7,699 × 33 — same transform, fitted on train only. |
+| `figures/*.png` | 8 EDA charts. |
+
+---
+
+## 📁 Repository structure
+
+```
+.
+├── data/
+│   ├── DSI_kickstarterscrape_dataset.csv   # raw Kaggle file (git-ignored, download yourself)
+│   └── processed/                          # written by the notebook (git-ignored)
+├── figures/                                # EDA charts, committed
+├── notebooks/
+│   └── kickstarter_data_prep_and_eda.ipynb # Tasks 1–5, end to end
+├── requirements.txt
+└── README.md
 ```
 
-**6. Run the notebooks in order** (Jupyter or VS Code)
-
-| Notebook | Milestone | What it does |
-|----------|-----------|--------------|
-| `notebooks/milestone1_data_preparation.ipynb` | 1 – Data Preparation | Filtering, U.S. records, missing values, label cleanup, leakage removal, encoding |
-| `notebooks/milestone2_eda.ipynb` | 2 – EDA | Success vs. goal, duration, updates, category, state, reward levels; correlations |
-| `notebooks/milestone3_*.ipynb` | 3 – Machine Learning | *Coming next* |
-| `notebooks/milestone4_*.ipynb` | 4 – Recommendation Prototype | *Planned* |
+All logic lives in the notebook; there is no separate `scripts/` package to keep in sync with it.
 
 ---
 
@@ -75,14 +102,20 @@ python scripts/filter_campaigns.py        # writes data/processed/kickstarter_us
 Crowdfunding creators often set goals and campaign lengths without knowing what tends to work. This project uses past Kickstarter data to (1) predict whether a campaign will succeed and (2) turn the patterns behind successful campaigns into practical advice, such as setting a more realistic goal or a shorter campaign.
 
 **ML problem type:** supervised binary classification (1 = successful, 0 = failed).
-**Success criteria:** about 80%+ accuracy, plus strong precision, recall, F1, and ROC-AUC.
-**Benchmark to reproduce:** Random Forest, about 80.2% accuracy, F1 = 0.834 (original project).
+**Baseline to beat:** 54.7% — always predicting "successful". Classes are near-balanced, so accuracy
+is a meaningful headline metric, reported alongside precision, recall, F1 and ROC-AUC.
+**Target:** ~80% accuracy, carried over from the original team project's Random Forest
+(≈80.2% accuracy, F1 ≈ 0.834). That figure was produced **before** the leakage columns were
+identified, so it is treated as a loose reference rather than a goal to match — a clean
+launch-time-only model should be expected to score lower, and that is the correct outcome.
 
 ---
 
 ## 📊 Data Exploration
 
 **Dataset:** Kickstarter Projects (Kaggle), 45,957 rows × 17 columns (CSV).
+**Coverage:** campaigns launched 2009-04-21 → 2012-05-29 (deadlines through 2012-06-03). This is
+early-platform Kickstarter, so conclusions do not automatically transfer to the platform today.
 
 ### Data preparation log
 
@@ -91,41 +124,67 @@ Crowdfunding creators often set goals and campaign lengths without knowing what 
 | Raw data | 45,957 |
 | Keep `successful` / `failed` (drop live, canceled, suspended) | 41,965 |
 | Fix HTML codes in labels (14 → 13 categories) | 41,965 |
-| Keep U.S. campaigns (valid 2-letter state), split location into city and state | 38,504 |
-| Drop rows with missing values | **38,463** |
+| Keep U.S. campaigns (valid 2-letter state), split location into city and state | 38,533 |
+| Drop rows missing essential fields | **38,492** |
 
-**Leakage removed:** `pledged`, `funded percentage`, `backers`, `comments`, and `funded date` are only known after a campaign ends.
-**Encoding:** one-hot for `category` and `state`, frequency encoding for `subcategory`; `city` dropped (3,140 values).
-**New features:** `min_reward` and `max_reward` parsed from the reward-levels text.
+**Leakage quarantined:** `pledged`, `funded percentage`, `backers`, `comments`, and `updates` are only
+observable after a campaign runs. `funded date` is the deadline — it is kept just long enough to
+recover the launch date, then dropped.
+
+**Encoding:** one-hot for `category` (13 levels); cross-fitted target encoding for `subcategory`
+(49) and `state` (51); `city` dropped (3,155 values, captured by `state`).
+**Scaling:** `StandardScaler` on all numerics, with `log1p` applied first to the skewed money
+columns. Encoders and scalers are fitted on the **training split only**.
+
+**Engineered features:** `duration_days` and launch calendar position (recovered from
+deadline − duration), reward-tier statistics (`min`/`max`/`mean`/`median`/`spread`, `n_reward_tiers`),
+and pacing ratios (`goal_per_day`, `backers_needed_at_mean_reward`, `reward_min_to_goal`), plus an
+`is_default_30d` flag.
 
 ### Key EDA findings
-Overall success rate: **54.8%** (classes are fairly balanced).
+Overall success rate: **54.7%** (classes are fairly balanced).
 
-| Factor | Finding |
-|--------|---------|
-| Goal | Success drops from about 69% (<$1k) to about 13% ($50k+) |
-| Duration | Under 30 days: about 65%. Over 60 days: about 42% |
-| Updates | 0 updates: about 20%. 10+: about 91% (may be leakage) |
-| Category | Dance, Theater, Music highest (68–76%); Fashion, Technology, Publishing lowest (32–39%) |
-| Reward tiers | 1–3 tiers: about 36%. 13+ tiers: about 69% |
-| State | CA and NY make up about 38% of campaigns; state matters less than goal or category |
+| Factor | Finding | Spearman ρ |
+|--------|---------|-----------|
+| Goal | 69.0% under $1k → 13.0% above $50k, monotonic across every band | −0.26 |
+| Reward tiers (count) | 36.1% at 1–3 tiers → 68.9% at 13+ | +0.15 |
+| Duration | 67.8% under 15 days → 41.6% past 60 days | −0.13 |
+| Category | Dance 76.1%, Theater 70.5%, Music 67.8% / Fashion 32.5%, Technology 38.3% | — |
+| State | 37.0% (FL) → 65.2% (NY) among states with 200+ campaigns; CA + NY = 38% of all | — |
+| Reward *prices* | Near-flat — `reward_min`/`mean`/`max`/`spread` all \|ρ\| ≤ 0.03 | ~0 |
+| Launch timing | Near-flat — year moves only 56.5% (2009) → 53.3% (2012) | ~0 |
 
 Charts are saved in `figures/`.
 
 ### Challenges
-- **Data leakage:** several columns are only known after the campaign ends.
-- **`updates` timing:** creators post updates during the campaign, so the feature may not be fully available at launch.
-- **Skewed goals:** some goals reach $21M, so ranges and rank-based correlation were used.
+- **Data leakage:** `funded percentage` (ρ = 0.86), `backers` (0.72), `pledged` (0.70),
+  `update_frequency` (0.57), `updates` (0.55) and `comments` (0.47) all beat every genuine
+  launch-time feature. All six are excluded from the model matrix.
+- **The 30-day artifact:** the exactly-30-day band (53.6%) underperforms the 31–45 day band (61.0%),
+  breaking the otherwise-downward duration trend. 30 days is Kickstarter's default, so that band is
+  dominated by creators who accepted it rather than chose it — a selection effect, handled with the
+  `is_default_30d` flag.
+- **Skewed and censored values:** goals reach $21.47M (= 2³¹ cents, an overflow sentinel rather than
+  a real goal) and reward amounts cap at exactly $10,000 in the source scrape. Log transforms and
+  rank-based correlation limit the damage; a hard upper clip is worth testing at the modeling stage.
+- **Correlated features:** `goal_log`, `goal_per_day` and `backers_needed_at_mean_reward` share
+  terms, as do the reward statistics. Tree models tolerate this; a linear baseline needs
+  regularization.
 
 ---
 
 ## 🧠 Model Development *(Milestone 3, in progress)*
 
 Plan:
-- Stratified 80/20 train/test split
-- Baseline: Logistic Regression; compare with KNN, Random Forest, and XGBoost
-- Train each model **with and without `updates`** to measure leakage risk
-- Tune with `GridSearchCV`, explain with feature importance and SHAP
+- Stratified 80/20 train/test split — **already built**, in `data/processed/train_encoded.csv` and
+  `test_encoded.csv`, with all encoders and scalers fitted on the training split only.
+- Baseline: Logistic Regression; compare with KNN, Random Forest, and XGBoost.
+- Headline models use **launch-time features only**. Separately, run a leakage *ablation* that adds
+  `updates` back in — not as a candidate model, but to quantify how much the original ~80% benchmark
+  owed to post-launch information.
+- Replace the single split with cross-validation before reporting final numbers, so results do not
+  hinge on one partition.
+- Tune with `GridSearchCV`; explain with feature importance and SHAP.
 
 ---
 
@@ -142,9 +201,15 @@ Plan:
 
 ## 🚀 Next Steps
 
-- Finish Milestone 3 modeling and fill in the results table
-- Build the Milestone 4 recommendation prototype for at-risk campaigns
-- Limitations to address: association vs. causation, the timing of `updates`, and the effect of using a single test split
+- Finish the modeling notebook and fill in the results table above.
+- Build the recommendation prototype for at-risk campaigns — most of the actionable levers it will
+  use (goal, duration, tier count) are the features the EDA already ranked.
+- Test a hard upper clip on `goal` to handle the $21.47M overflow sentinel.
+- Limitations to address:
+  - **Association, not causation.** More reward tiers correlate with success, but most plausibly as
+    a proxy for creator preparation. Recommendations must be framed accordingly.
+  - **Single split.** Current numbers would rest on one partition; move to cross-validation.
+  - **Era.** The data stops in mid-2012.
 
 ---
 
