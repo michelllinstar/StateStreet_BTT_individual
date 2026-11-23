@@ -2,11 +2,11 @@
 
 Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fall 2026)** program. The project predicts whether a Kickstarter campaign will succeed or fail using information available at launch, explains which factors drive those predictions, and will prototype recommendations for campaigns at risk of failing.
 
-📋 **Project board:** [paste your GitHub Project link here]
+**Project board:** (https://github.com/users/michelllinstar/projects/2)
 
 ---
 
-## 👩🏻‍💻 Author
+## Author
 
 | Name | GitHub Handle | Contribution |
 |------|---------------|--------------|
@@ -16,7 +16,7 @@ Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fa
 
 ---
 
-## 🎯 Project Highlights
+## Project Highlights
 
 - Built a reproducible pipeline that turns **45,957 raw campaigns** into **38,492 U.S. campaigns** with a final success/fail outcome.
 - Cleaned inconsistent category labels (e.g. `Film &amp; Video` vs. `Film & Video`) and quarantined **data-leakage** columns (pledged, funded percentage, backers, comments, updates).
@@ -25,7 +25,7 @@ Built for a **State Street** challenge in the **Break Through Tech AI Studio (Fa
 
 ---
 
-## 👩🏽‍💻 Setup and Installation
+## Setup and Installation
 
 **1. Clone the repository**
 ```bash
@@ -35,7 +35,7 @@ cd StateStreet_BTT_individual
 
 **2. Create a virtual environment**
 
-⚠️ **Python 3.11 or newer is required.** On older interpreters (3.8/3.9, which ship with macOS and
+**Python 3.11 or newer is required.** On older interpreters (3.8/3.9, which ship with macOS and
 are often first on `PATH`) `pip` finds no prebuilt wheels for current pandas and falls back to
 compiling from source, which hangs for a long time and then fails. Check before creating the
 environment:
@@ -79,7 +79,7 @@ Running it end to end writes:
 
 ---
 
-## 📁 Repository structure
+## Repository structure
 
 ```
 .
@@ -97,7 +97,7 @@ All logic lives in the notebook; there is no separate `scripts/` package to keep
 
 ---
 
-## 🏗️ Project Overview
+## Project Overview
 
 Crowdfunding creators often set goals and campaign lengths without knowing what tends to work. This project uses past Kickstarter data to (1) predict whether a campaign will succeed and (2) turn the patterns behind successful campaigns into practical advice, such as setting a more realistic goal or a shorter campaign.
 
@@ -111,7 +111,7 @@ launch-time-only model should be expected to score lower, and that is the correc
 
 ---
 
-## 📊 Data Exploration
+## Data Exploration
 
 **Dataset:** Kickstarter Projects (Kaggle), 45,957 rows × 17 columns (CSV).
 **Coverage:** campaigns launched 2009-04-21 → 2012-05-29 (deadlines through 2012-06-03). This is
@@ -261,7 +261,7 @@ Goal × Category terms over plain logistic regression.
 
 ---
 
-## 🧠 Model Development *(Milestone 3, in progress)*
+## Model Development *(Milestone 3, in progress)*
 
 Plan:
 - Stratified 80/20 train/test split — **already built**, in `data/processed/train_encoded.csv` and
@@ -276,7 +276,7 @@ Plan:
 
 ---
 
-## 📈 Results & Key Findings
+## Results & Key Findings
 
 | Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
 |-------|----------|-----------|--------|----|---------|
@@ -287,7 +287,7 @@ Plan:
 
 ---
 
-## 🚀 Next Steps
+## Next Steps
 
 - Finish the modeling notebook and fill in the results table above.
 - Build the recommendation prototype for at-risk campaigns — most of the actionable levers it will
@@ -301,13 +301,13 @@ Plan:
 
 ---
 
-## 📝 License
+## License
 
 To be confirmed with the Challenge Advisor.
 
 ---
 
-## 📄 References
+## References
 
 - [Kickstarter](https://www.kickstarter.com/)
 - Kickstarter Projects dataset (Kaggle)
@@ -318,6 +318,6 @@ To be confirmed with the Challenge Advisor.
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 Thank you to Challenge Advisor **Parth Rana** and AI Studio Coach **Darshan Ugale** for their guidance, and to Break Through Tech AI Studio.
