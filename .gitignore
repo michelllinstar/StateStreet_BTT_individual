@@ -1,12 +1,9 @@
-# Raw and processed data: do not commit (download from Kaggle, then run scripts/filter_campaigns.py)
+# Raw and processed data: do not commit
+# (download the raw CSV from Kaggle; the notebook writes data/processed/)
 data/*
 !data/.gitkeep
 *.zip
 kaggle.json
-
-# Keep the small sample
-!sample_data/
-!sample_data/kickstarter_sample.csv
 
 # Python
 __pycache__/
